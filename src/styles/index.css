@@ -1,0 +1,174 @@
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--milk);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      font-size: 1.0625rem;
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--charcoal);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--amber);
+    color: var(--charcoal);
+  }
+}
+
+@layer components {
+  /* Oversized type and tonal discs run past the edge on purpose, so each
+     section clips its own — never `overflow` on body, which breaks sticky.
+     Both axes: a disc escaping vertically lands on the next section. */
+  .section-clip {
+    overflow: clip;
+  }
+
+  /* Condensed, uppercase, very tight. The whole personality of the page. */
+  .u-display {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.92;
+    color: var(--charcoal);
+  }
+
+  /* Small uppercase amber label above a heading. */
+  .u-eyebrow {
+    font-family: var(--font-display);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 0.8125rem;
+    color: var(--amber-ink);
+  }
+
+  /* On a dark ground the bright amber is safe and the darkened one isn't. */
+  .on-dark .u-eyebrow,
+  [data-tone='dark'] .u-eyebrow {
+    color: var(--amber);
+  }
+
+  .u-util {
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.8125rem;
+  }
+
+  /* Every surface that takes the feature colour shares one curve. */
+  .u-retint {
+    transition:
+      background-color var(--retint),
+      border-color var(--retint),
+      color var(--retint);
+  }
+
+  /* A rail that scrolls sideways without a scrollbar cutting across it. The
+     rail is never the only way to reach a slide — arrows and drag both work —
+     so nothing is lost by hiding the bar. */
+  .u-rail {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .u-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hollow display type. Used at absurd sizes behind content, where a filled
+     numeral would compete with the thing it sits behind. */
+  .u-outline {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--charcoal);
+  }
+
+  /* Continuous rotation for the swipe badge. Slow enough to read as a dial
+     turning rather than a spinner loading. */
+  .u-turn {
+    animation: ts-turn 30s linear infinite;
+  }
+
+  /* The tonal discs behind the deck. Two speeds, opposite directions, so the
+     ground never settles into a fixed composition. */
+  .u-drift-a {
+    animation: ts-drift-a 22s ease-in-out infinite;
+  }
+
+  .u-drift-b {
+    animation: ts-drift-b 27s ease-in-out infinite;
+  }
+}
+
+@keyframes ts-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ts-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-5%, 7%, 0) scale(1.12);
+  }
+}
+
+@keyframes ts-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.06);
+  }
+  50% {
+    transform: translate3d(6%, -6%, 0) scale(0.94);
+  }
+}
+
+/* Autoplay progress. Paused via animation-play-state rather than restarted, so
+   a hover freezes the bar instead of emptying it. */
+@keyframes ts-sweep {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

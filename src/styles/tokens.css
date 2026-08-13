@@ -1,0 +1,136 @@
+/* ThirsTEA design tokens — the only place a colour value is written down. */
+
+:root {
+  /* Structural palette */
+  /*
+    Brown sugar and milk — the shop's signature drink, used as the whole system.
+    Deep espresso and warm cream are the structure; caramel is the brand colour
+    and appears as a SURFACE, not as type. That last part matters: a vivid warm
+    colour can never carry small text on cream (amber measures 2.5:1), so every
+    previous attempt at a bright accent collapsed into mud. Colour here is
+    something you stand on, not something you read.
+  */
+  --charcoal: #1E1611;    /* Deep espresso. Type on cream, and whole sections */
+  --charcoal-2: #33261C;  /* Hover lift */
+  --caramel: #C8781F;     /* The brand colour. Panels, badges, fills */
+  --caramel-2: #A85F14;   /* Its hover / deeper edge */
+  /* The only two accents allowed to be type, both measured. */
+  --accent: #8A4A12;         /* Display accent on cream */
+  --accent-bright: #F0A81E;  /* Display accent on espresso */
+  --amber: var(--caramel);
+  --amber-ink: var(--accent);
+  --sand: #F0E4D2;        /* The warm band. Visibly warmer than the page */
+  --milk: #FBF4E9;        /* Page ground */
+  --ink: #241A12;         /* Body copy — warm, not neutral grey */
+  --danger: #B3261E;      /* Form errors */
+
+  /* The drinks. Saturated enough to actually register as colour. */
+  --wood: #B0703A;
+  --mango: #F0A81E;
+  --strawberry: #EC7F9B;
+  --matcha: #7FA855;
+  --taro: #9B7ED1;
+
+  --ink-70: rgba(36, 26, 18, 0.72);
+  --ink-muted: rgba(36, 26, 18, 0.66);
+  --ink-12: rgba(36, 26, 18, 0.14);
+  --milk-70: rgba(251, 244, 233, 0.74);
+  /* Fine print on charcoal. 0.62, not 0.42 — at 0.42 it measured 3.33:1. */
+  --milk-40: rgba(251, 244, 233, 0.64);
+  --milk-14: rgba(251, 244, 233, 0.14);
+  --charcoal-12: rgba(30, 22, 17, 0.14);
+
+  --neutral: rgba(36, 26, 18, 0.06);
+  --neutral-strong: rgba(36, 26, 18, 0.1);
+
+  /* Shape */
+  --radius-card: 22px;
+  --radius-lg: 40px;
+  --radius-xl: 56px;
+  --shell: 1240px;
+  --gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --section-y: clamp(4.5rem, 8vw, 7.5rem);
+
+  /* One curve, shared by everything that changes colour, so a recolour reads
+     as a single event instead of four near-misses. */
+  --retint: 520ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --lift: 0 18px 40px -12px rgba(30, 22, 17, 0.26), 0 4px 12px -6px rgba(30, 22, 17, 0.14);
+  --lift-card: 0 14px 34px -16px rgba(30, 22, 17, 0.24);
+  /* The deck's top card carries a heavier shadow than any static card, because
+     it is the one thing on the page the hand is meant to reach for. */
+  --lift-deck: 0 40px 70px -28px rgba(30, 22, 17, 0.5), 0 12px 24px -14px rgba(30, 22, 17, 0.3);
+
+  /*
+    The hero's dissolve into the cream band.
+
+    This replaces a curved cream shape, which met the artwork at a hard edge no
+    matter how gentle the curve was — a seam is a seam. The stops are eased
+    rather than evenly spaced: a linear ramp in alpha reads as a visible band
+    of its own, because perceived lightness doesn't move linearly with it.
+    Fully transparent is written out in the same rgb as the solid end, so no
+    browser interpolates it through transparent black and greys the middle.
+  */
+  --fade-milk: linear-gradient(
+    to bottom,
+    rgba(251, 244, 233, 0) 0%,
+    rgba(251, 244, 233, 0.07) 20%,
+    rgba(251, 244, 233, 0.24) 40%,
+    rgba(251, 244, 233, 0.52) 58%,
+    rgba(251, 244, 233, 0.8) 74%,
+    rgba(251, 244, 233, 0.95) 88%,
+    rgba(251, 244, 233, 1) 100%
+  );
+
+  /* The floating cup has no box to cast from, so its shadow is a drop-shadow
+     tracing the silhouette rather than a rectangle behind it. */
+  --cup-shadow: drop-shadow(0 12px 18px rgba(30, 22, 17, 0.26))
+    drop-shadow(0 3px 6px rgba(30, 22, 17, 0.16));
+
+  /* Bottom scrim over card photography, so display type stays readable no
+     matter which photo lands underneath it. Declared here rather than inline
+     so no component has to write a colour value down. */
+  --scrim: linear-gradient(
+    to top,
+    rgba(30, 22, 17, 0.9) 0%,
+    rgba(30, 22, 17, 0.62) 26%,
+    rgba(30, 22, 17, 0.16) 56%,
+    rgba(30, 22, 17, 0) 78%
+  );
+
+  --font-display: 'Oswald', 'Haettenschweiler', 'Arial Narrow', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/*
+  The feature system.
+
+  Both tints are declared on the SAME selector that sets --feature, never on
+  :root. A custom property substitutes var() against the element it is declared
+  on, so --feature-soft on :root would freeze against the root's colour and
+  never follow a retint. This rule is what makes the hero recolour work.
+
+  Order matters: this block and the [data-feature='x'] blocks below have equal
+  specificity, so the defaults must come first and be overridden by what follows.
+*/
+[data-feature] {
+  --feature: var(--wood);
+  --feature-soft: color-mix(in oklab, var(--feature) 18%, var(--milk));
+  --feature-deep: color-mix(in oklab, var(--feature) 58%, var(--ink));
+  /* Filled pills. Ink on raw --wood measures 4.47:1 and misses AA for small
+     text; lifting every feature by 12% of milk clears all five. */
+  --feature-fill: color-mix(in oklab, var(--feature) 88%, var(--milk));
+  /* The saturated hero ground. Deep enough to carry cream type at display size. */
+  --feature-hero: color-mix(in oklab, var(--feature) 82%, var(--charcoal));
+}
+
+/* The drink colours stay where a drink is actually being shown — the hero
+   ground, product tints, the active dot. They are deliberately NOT used as the
+   headline accent: an accent that changes every section reads as an accident,
+   not a system. */
+
+[data-feature='taro'] { --feature: var(--taro); }
+[data-feature='mango'] { --feature: var(--mango); }
+[data-feature='strawberry'] { --feature: var(--strawberry); }
+[data-feature='matcha'] { --feature: var(--matcha); }
+[data-feature='wood'] { --feature: var(--wood); }

@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output — regenerable with `npm run build`
+dist/
+tsconfig.tsbuildinfo
+
+# Intermediate artwork from the image generation passes. The finished assets
+# that the site actually loads live in public/images and are committed.
+tmp/
+
+# Dev server logs
+*.log
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
