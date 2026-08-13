@@ -122,6 +122,20 @@ export default function RightNow() {
   const inView = useInView(sectionRef, { amount: 0.35 })
   const busy = useRef(false)
 
+  /* The fan is written in pixels, which is right on a wide screen and wrong on
+     a phone: at full spread the second and third cards hung past the right
+     edge and got sliced by the section's own clip, so the deck read as a
+     photo running off the page. Same composition, scaled to the room. */
+  const [narrow, setNarrow] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)')
+    const sync = () => setNarrow(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+  const fan = narrow ? 0.45 : 1
+
   const panel = PANELS[index]
   const playing = inView && !held && !exiting && !reduced
 
@@ -266,6 +280,7 @@ export default function RightNow() {
                       offset={offset}
                       isTop={offset === 0}
                       dir={dir}
+                      fan={fan}
                       reduced={reduced}
                       exiting={offset === 0 ? exiting : null}
                       onExited={exited}
@@ -464,6 +479,7 @@ function DeckCard({
   offset,
   isTop,
   dir,
+  fan,
   reduced,
   exiting,
   onExited,
@@ -474,6 +490,8 @@ function DeckCard({
   offset: number
   isTop: boolean
   dir: 1 | -1
+  /** Scales the fan's pixel offsets to the screen it's actually on. */
+  fan: number
   reduced: boolean
   exiting: { flyX: 1 | -1 } | null
   onExited: () => void
@@ -489,7 +507,9 @@ function DeckCard({
   const grabbed = useRef<{ x: number; y: number } | null>(null)
 
   const hidden = offset >= SLOTS.length
-  const target = hidden ? (dir === -1 ? OFFSTAGE : TUCKED) : SLOTS[offset]
+  const base = hidden ? (dir === -1 ? OFFSTAGE : TUCKED) : SLOTS[offset]
+  /* Offstage keeps its full travel — it only has to end up out of sight. */
+  const target = hidden && dir === -1 ? base : { ...base, x: base.x * fan, y: base.y * fan }
 
   /* A card thrown off-screen has to be back at rest before it reappears at the
      bottom of the fan. It's already invisible by then, so this never shows. */

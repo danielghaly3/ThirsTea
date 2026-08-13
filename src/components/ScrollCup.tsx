@@ -81,7 +81,10 @@ export default function ScrollCup() {
           aria-label="Back to top"
           /* Lands under the mobile nav sheet (z-50) on purpose — the cup has no
              business floating over a full-screen menu. */
-          className="group fixed bottom-5 right-4 z-[45] grid place-items-center sm:bottom-8 sm:right-7"
+          /* Clears the iPhone home indicator via the safe-area inset, and sits
+             tighter on phones — at desktop size it covered a line of the hours
+             table and the Story CTAs as they scrolled past the corner. */
+          className="group fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-3 z-[45] grid place-items-center sm:bottom-[calc(2rem+env(safe-area-inset-bottom))] sm:right-7"
           initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.4, y: 28, rotate: -18 }}
           animate={reduced ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0, rotate: 0 }}
           exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.5, y: 20, rotate: 12 }}
@@ -115,7 +118,9 @@ export default function ScrollCup() {
 
           <svg
             viewBox="0 0 56 74"
-            className="h-[4.5rem] w-[3.4rem]"
+            /* Still a 46px-wide target on phones, so it clears the 44px
+               minimum while intruding less on the content behind it. */
+            className="h-[3.8rem] w-[2.9rem] sm:h-[4.5rem] sm:w-[3.4rem]"
             style={{ filter: 'var(--cup-shadow)' }}
             aria-hidden
           >

@@ -28,7 +28,12 @@ export default function AnimatedLogo() {
     >
       {inView && !reduced ? (
         <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
-          <Suspense fallback={<StaticLogo />}>
+          {/* Empty while the Player chunk loads, not the static lockup.
+              The ident opens on a blank frame, so falling back to the finished
+              logo made it appear, vanish, and then rebuild itself — the exact
+              impression of a logo that keeps disappearing. Better to show
+              nothing for that moment than to show the answer and take it away. */}
+          <Suspense fallback={null}>
             <ThirsteaLogoPlayer />
           </Suspense>
         </div>
