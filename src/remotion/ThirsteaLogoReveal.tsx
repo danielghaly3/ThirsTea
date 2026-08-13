@@ -53,6 +53,7 @@ export default function ThirsteaLogoReveal() {
       >
         <Interactive.Div
           name="Tapioca pearl"
+          data-logo-pearl
           style={{
             backgroundColor: 'var(--charcoal)',
             borderRadius: '50%',

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/((?!assets/|images/|favicon|robots\\.txt).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

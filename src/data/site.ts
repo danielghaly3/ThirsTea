@@ -80,7 +80,16 @@ export const DEAL = {
 export const LINKS = {
   instagram: 'https://www.instagram.com/thirstea_mississauga/',
   instagramHandle: '@thirstea_mississauga',
-  uberEats: 'https://www.ubereats.com/',
+  /**
+   * The shop's actual Uber Eats storefront, supplied by the owner. Every
+   * "Order now" on the site — both nav buttons, the hero band and the footer —
+   * reads this one value, so the demo's placeholder homepage link is gone from
+   * all four at once.
+   */
+  uberEats:
+    'https://www.ubereats.com/ca/store/thirstea/iMBtRMsVRBCcgLlB8by71w?diningMode=DELIVERY&surfaceName=',
+  /* Still the platform homepage — no DoorDash store URL supplied yet, and the
+     footer link is labelled "DoorDash", so it can't be pointed at Uber Eats. */
   doorDash: 'https://www.doordash.com/',
   tooGoodToGo: 'https://www.toogoodtogo.com/',
   /**
