@@ -21,6 +21,24 @@
   </head>
   <body>
     <div id="root"></div>
+    <!--
+      Refreshing has to land at the top of the page.
+
+      Browsers restore the previous scroll position on reload, which drops a
+      returning visitor halfway down a page whose hero they never see again.
+      Inline and before the app bundle on purpose: the browser decides whether
+      to restore scroll very early, and a module script is too late to stop it.
+
+      Anchors are left alone — the skip link relies on #main still working.
+    -->
+    <script>
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual'
+      }
+      if (!window.location.hash) {
+        window.scrollTo(0, 0)
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
