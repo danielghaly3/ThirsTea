@@ -1,4 +1,4 @@
-import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from 'remotion'
+import { AbsoluteFill, useCurrentFrame } from 'remotion'
 
 /**
  * The logo ident: the drink pours in and fills the name.
@@ -19,16 +19,22 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from 'remotion'
 
 const DURATION = 150
 
-/* Where the tide comes to rest.
-   Tuned to land partway UP the letterforms, not below them: the two-tone
-   wordmark is the point of the ident, so it has to hold there for most of the
-   cycle rather than flashing past mid-pour. */
-const REST_LEVEL = 48.5
-
-/* Off the bottom of the frame. The cycle begins and ends here, which is what
-   makes the loop seamless: the tide is out of sight at both ends, so the wave
-   phase resetting is invisible and there is no cut. */
-const OFF_FRAME = 130
+/*
+ * The cup never empties.
+ *
+ * An earlier cut of this loop poured the tide in and drained it back off the
+ * bottom of the frame. Measured, that left 29% of every cycle — nearly a
+ * second and a half in five — with no liquid on screen at all, which is
+ * indistinguishable from a logo whose animation has stopped. Anyone glancing
+ * over during that window saw a still mark and reasonably concluded it was
+ * broken.
+ *
+ * So the tide now breathes between two levels that both keep liquid in frame.
+ * At low water it sits just under the letters; at high water it runs up
+ * through them. There is no moment where the mark is dry.
+ */
+const MID_LEVEL = 50
+const SWING = 7
 
 /** Sine-edged fill line, as a percentage-based polygon clip. */
 function tideClip(level: number, phase: number, amplitude: number) {
@@ -47,64 +53,43 @@ function tideClip(level: number, phase: number, amplitude: number) {
 }
 
 /**
- * Tapioca. Each lands on its own beat so they read as poured, not placed.
+ * Tapioca, permanently settled under the surface and drifting on the swell.
  *
- * `from: 0` on the first one: the cycle starts moving on frame 0 with nothing
- * held back, so a loop never sits on a still frame waiting to begin.
- *
- * They leave down the bottom as the cup empties. That matters for the loop —
- * left behind, they'd be stranded as black circles on bare cream once the tide
- * drained out from under them.
+ * They used to drop in at the top of the cycle and fall out the bottom at the
+ * end of it. With a tide that never leaves, there is nothing to drop into and
+ * nothing to strand them — so they simply live there, each riding the water on
+ * its own offset so the group never moves as one block.
  */
 const PEARLS = [
-  { x: 39, size: 66, from: 0, to: 26, rest: 74 },
-  { x: 50, size: 76, from: 3, to: 30, rest: 78 },
-  { x: 61.5, size: 62, from: 6, to: 34, rest: 74.5 },
-  { x: 45, size: 52, from: 9, to: 36, rest: 68 },
-  { x: 56, size: 48, from: 12, to: 38, rest: 68.5 },
+  { x: 39, size: 66, rest: 74, offset: 0 },
+  { x: 50, size: 76, rest: 78, offset: 1.1 },
+  { x: 61.5, size: 62, rest: 74.5, offset: 2.2 },
+  { x: 45, size: 52, rest: 68, offset: 3.4 },
+  { x: 56, size: 48, rest: 68.5, offset: 4.6 },
 ]
-
-/** The cycle: pour, hold, sip it back down, repeat. */
-const POURED = 42
-const SETTLED = 58
-const DRAIN_FROM = 102
-const DRAIN_TO = 144
 
 export default function ThirsteaLogoReveal() {
   const frame = useCurrentFrame()
 
-  /* The tide, over one full cycle. It moves on frame 0 — no lead-in — pours
-     past its resting line, settles back, holds through the middle of the loop,
-     then drains away to exactly where it started. Beginning and end are both
-     off the bottom of the frame, so the repeat has no seam. */
-  const level = interpolate(
-    frame,
-    [0, POURED, SETTLED, DRAIN_FROM, DRAIN_TO],
-    [OFF_FRAME, REST_LEVEL - 3.5, REST_LEVEL, REST_LEVEL, OFF_FRAME],
-    {
-      easing: Easing.bezier(0.22, 1, 0.36, 1),
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-    },
-  )
+  /*
+   * Everything below is a pure function of one angle that completes exactly
+   * one turn per loop. That is what makes the repeat seamless — not easing the
+   * ends together, but never having ends. Every wave count is a whole number
+   * of periods, so frame DURATION is bit-for-bit frame 0 and there is no cut
+   * to hide.
+   */
+  const theta = (frame / DURATION) * Math.PI * 2
 
-  /* Choppy while pouring, almost flat at rest, stirred up again on the way out. */
-  const amplitude = interpolate(
-    frame,
-    [0, POURED, SETTLED + 20, DRAIN_FROM, DRAIN_TO],
-    [6, 3.2, 1.2, 2.4, 5],
-    {
-      easing: Easing.bezier(0.22, 1, 0.36, 1),
-      extrapolateLeft: 'clamp',
-      extrapolateRight: 'clamp',
-    },
-  )
+  /* Low water at the top of the loop, high water halfway through. */
+  const level = MID_LEVEL + SWING * Math.cos(theta)
 
-  const phase = frame * 0.14
-  const clipPath = tideClip(level, phase, amplitude)
-  /* The back swell runs the other way and sits a touch deeper, so the surface
-     reads as a body of liquid rather than a single drawn line. */
-  const backClip = tideClip(level + 2.4, -phase * 0.8, amplitude * 0.7)
+  /* Choppier at high water, calmer at low. Seamless: cos returns to itself. */
+  const amplitude = 2.8 - 1.2 * Math.cos(theta)
+
+  /* Three wave periods per loop on the front swell, two the other way on the
+     back one. Whole numbers, so both close exactly where they opened. */
+  const clipPath = tideClip(level, theta * 3, amplitude)
+  const backClip = tideClip(level + 2.4, theta * -2, amplitude * 0.7)
 
   return (
     <AbsoluteFill
@@ -119,18 +104,11 @@ export default function ThirsteaLogoReveal() {
       {/* 1 — the wordmark, charcoal. Present and opaque from frame 0. */}
       <Lockup tone="var(--charcoal)" pearlTone="var(--charcoal)" />
 
-      {/* 2 — tapioca, dropped in before the tide arrives to cover them. */}
+      {/* 2 — tapioca, riding the swell under the surface. */}
       {PEARLS.map((p) => {
-        const drop = interpolate(
-          frame,
-          [p.from, p.to, DRAIN_FROM, DRAIN_TO - 4],
-          [-40, p.rest, p.rest, 150],
-          {
-            easing: Easing.spring({ damping: 11, mass: 0.6, stiffness: 120 }),
-            extrapolateLeft: 'clamp',
-            extrapolateRight: 'clamp',
-          },
-        )
+        /* Rides the same angle as the tide, so it bobs with the water rather
+           than against it, and closes the loop for free. */
+        const drop = p.rest + 1.8 * Math.sin(theta + p.offset) + SWING * 0.35 * Math.cos(theta)
         return (
           <div
             key={p.x}
@@ -189,17 +167,11 @@ export default function ThirsteaLogoReveal() {
           clipPath,
           height: 10,
           left: 0,
-          opacity: interpolate(frame, [SETTLED, SETTLED + 14, DRAIN_FROM - 6], [0, 0.9, 0], {
-            extrapolateLeft: 'clamp',
-            extrapolateRight: 'clamp',
-          }),
+          /* Zero at both ends of the loop, so the sweep's reset is invisible. */
+          opacity: Math.max(0, Math.sin(theta)) * 0.75,
           position: 'absolute',
           top: `${level}%`,
-          transform: `translateX(${interpolate(frame, [SETTLED, DRAIN_FROM - 6], [-60, 60], {
-            easing: Easing.bezier(0.22, 1, 0.36, 1),
-            extrapolateLeft: 'clamp',
-            extrapolateRight: 'clamp',
-          })}%)`,
+          transform: `translateX(${(-55 + (theta / (Math.PI * 2)) * 110).toFixed(2)}%)`,
           width: '100%',
         }}
       />
