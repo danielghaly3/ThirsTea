@@ -260,7 +260,7 @@ export default function HeroCarousel() {
           /* One pixel taller than its offset, so the gradient's solid end
              overlaps the band. Flush edges can land on a subpixel boundary and
              leave a hairline — the exact seam this replaced. */
-          className="pointer-events-none absolute -top-32 h-[calc(8rem+1px)] w-full sm:-top-48 sm:h-[calc(12rem+1px)]"
+          className="pointer-events-none absolute -top-28 h-[calc(7rem+1px)] w-full sm:-top-40 sm:h-[calc(10rem+1px)]"
           style={{ backgroundImage: 'var(--fade-milk)' }}
         />
 

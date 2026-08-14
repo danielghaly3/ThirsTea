@@ -70,15 +70,20 @@
     of its own, because perceived lightness doesn't move linearly with it.
     Fully transparent is written out in the same rgb as the solid end, so no
     browser interpolates it through transparent black and greys the middle.
+
+    The ramp is weighted late on purpose. Held earlier, it washed out the
+    bottom of the drink well before the cream band actually began. The cup is
+    the photograph the whole hero is built around, so the fade now stays out of
+    its way and does nearly all its work in the last third.
   */
   --fade-milk: linear-gradient(
     to bottom,
     rgba(251, 244, 233, 0) 0%,
-    rgba(251, 244, 233, 0.07) 20%,
-    rgba(251, 244, 233, 0.24) 40%,
-    rgba(251, 244, 233, 0.52) 58%,
-    rgba(251, 244, 233, 0.8) 74%,
-    rgba(251, 244, 233, 0.95) 88%,
+    rgba(251, 244, 233, 0.02) 30%,
+    rgba(251, 244, 233, 0.09) 50%,
+    rgba(251, 244, 233, 0.28) 66%,
+    rgba(251, 244, 233, 0.56) 79%,
+    rgba(251, 244, 233, 0.85) 90%,
     rgba(251, 244, 233, 1) 100%
   );
 
