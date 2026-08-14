@@ -265,9 +265,9 @@ export default function HeroCarousel() {
         />
 
         <div className="relative bg-milk">
-          <div className="mx-auto max-w-shell px-[var(--gutter)] pb-6 pt-2 sm:pb-8">
+          <div className="mx-auto max-w-shell px-[var(--gutter)] pb-4 pt-0 sm:pb-5">
             {/* Row one — what this drink is, and what the shop scores. */}
-            <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
+            <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-3">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={drink.id}
@@ -289,7 +289,7 @@ export default function HeroCarousel() {
                     />
                     {drink.id === 'muddy-milk' ? HERO_CROWN : drink.category}
                   </p>
-                  <p className="mt-2 max-w-[44ch] text-[0.9375rem] leading-relaxed text-ink-70">
+                  <p className="mt-1.5 max-w-[44ch] text-[0.9375rem] leading-relaxed text-ink-70">
                     {drink.note}
                   </p>
                 </motion.div>
@@ -323,7 +323,7 @@ export default function HeroCarousel() {
                           <Count to={Number(r.score)} decimals={1} delay={0.3 + i * 0.1} />
                         </span>
                       </p>
-                      <p className="mt-1.5 text-[0.6875rem] leading-tight text-ink-muted">
+                      <p className="mt-1 text-[0.6875rem] leading-tight text-ink-muted">
                         {r.platform}
                         <br />
                         {r.count}
@@ -342,7 +342,7 @@ export default function HeroCarousel() {
                 either side of a solid black CTA gave the row three things with
                 equal weight; there is one primary action here and it says
                 Order now. */}
-            <div className="mt-8 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+            <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
               <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                 <div className="flex shrink-0 items-center gap-2">
                   <Step label="Previous drink" onClick={() => go(-1)} side="left" />
@@ -356,7 +356,7 @@ export default function HeroCarousel() {
                 to={LINKS.uberEats}
                 external
                 variant="fill"
-                className="group shrink-0 !px-8 max-lg:w-full"
+                className="group shrink-0 !px-8 max-lg:w-full max-lg:!py-3.5"
               >
                 Order now
                 <Arrow className="transition-transform duration-300 group-hover:translate-x-1.5 motion-reduce:transition-none" />
@@ -365,7 +365,7 @@ export default function HeroCarousel() {
 
             {/* Fine print, kept well away from the real figures above it — set
                 beside the ratings it read as a caveat on the ratings. */}
-            <p className="mt-6 text-[0.6875rem] text-ink-muted">
+            <p className="mt-3 text-[0.6875rem] text-ink-muted">
               Drink artwork is placeholder — photography pending
             </p>
           </div>
