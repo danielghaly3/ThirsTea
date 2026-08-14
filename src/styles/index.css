@@ -148,6 +148,87 @@
   }
 }
 
+/*
+  The logo ident.
+
+  Split across three elements rather than combined, because they all animate
+  `transform` and the last declaration would otherwise win. Nesting lets the
+  tide breathe vertically while the wave travels horizontally underneath it.
+
+  The travel distance is exactly one wave period, so the loop closes on itself
+  — seamless by construction rather than by easing the ends together.
+*/
+@keyframes ts-tide-breathe {
+  0%,
+  100% {
+    transform: translateY(7px);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+@keyframes ts-tide-travel {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-25px);
+  }
+}
+
+/* The back swell runs the other way, so the two surfaces never move as one. */
+@keyframes ts-tide-drift {
+  from {
+    transform: translateX(-25px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes ts-pearl-bob {
+  0%,
+  100% {
+    transform: translateY(0.7px);
+  }
+  50% {
+    transform: translateY(-0.7px);
+  }
+}
+
+.ts-tide-breathe {
+  animation: ts-tide-breathe 5s ease-in-out infinite;
+}
+
+.ts-tide-travel {
+  animation: ts-tide-travel 3.2s linear infinite;
+}
+
+.ts-tide-drift {
+  animation: ts-tide-drift 4.6s linear infinite;
+}
+
+.ts-pearl-bob {
+  animation: ts-pearl-bob 5s ease-in-out infinite;
+}
+
+/*
+  Reduced motion stops the ident, and the global rule below would freeze it on
+  whichever keyframe it happened to land on — low water, with the wordmark all
+  one colour. Parking the tide at its midpoint instead keeps the two-tone mark
+  the ident exists to show. Stated here, after the animations, so it wins.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .ts-tide-breathe,
+  .ts-tide-travel,
+  .ts-tide-drift,
+  .ts-pearl-bob {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 /* Autoplay progress. Paused via animation-play-state rather than restarted, so
    a hover freezes the bar instead of emptying it. */
 @keyframes ts-sweep {
