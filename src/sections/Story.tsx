@@ -78,7 +78,8 @@ export default function Story() {
           </Reveal>
 
           <Reveal delay={0.12}>
-            <div className="relative mx-auto aspect-square w-full max-w-[32rem]">
+            <div className="relative mx-auto w-full max-w-[32rem]">
+              <div className="relative aspect-square w-full">
               <div aria-hidden className="u-retint absolute inset-0 rounded-[50%] bg-feature-soft" />
 
               {/* A dashed ring turning around the room, slowly. The shop is the
@@ -102,12 +103,22 @@ export default function Story() {
               <div className="absolute inset-[12%]">
                 <AnimatedLogo />
               </div>
+              </div>
 
-              {/* The address, on a plaque that never quite settles. */}
+              {/*
+                The address plaque.
+
+                It overlaps the logo from sm upwards, where the circle is big
+                enough to carry it — 13% of the face. On a phone the circle
+                shrinks to 266px while the plaque stays 240px wide, so the same
+                overlap swallowed 36% of it and buried the mark. Below sm it
+                drops out of the square entirely and sits underneath, where it
+                also gets the full width to set the address on fewer lines.
+              */}
               <motion.div
                 animate={reduced ? undefined : { y: [0, -7, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -left-2 bottom-2 max-w-[15rem] rounded-card bg-milk p-5 shadow-lift sm:-left-6 sm:bottom-6"
+                className="mt-6 rounded-card bg-milk p-5 shadow-lift sm:absolute sm:-left-6 sm:bottom-6 sm:mt-0 sm:max-w-[15rem]"
               >
                 <p className="u-eyebrow">Where it is</p>
                 <p className="u-display mt-2 text-[1.25rem] leading-tight">
