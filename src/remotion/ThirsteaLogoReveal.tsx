@@ -17,13 +17,18 @@ import { AbsoluteFill, Easing, interpolate, useCurrentFrame } from 'remotion'
  * worst case is a still logo instead of a missing one.
  */
 
-const DURATION = 100
+const DURATION = 150
 
 /* Where the tide comes to rest.
    Tuned to land partway UP the letterforms, not below them: the two-tone
-   wordmark is the whole point of the ident, so it has to survive into the
-   frame that gets held rather than flashing past mid-pour. */
+   wordmark is the point of the ident, so it has to hold there for most of the
+   cycle rather than flashing past mid-pour. */
 const REST_LEVEL = 48.5
+
+/* Off the bottom of the frame. The cycle begins and ends here, which is what
+   makes the loop seamless: the tide is out of sight at both ends, so the wave
+   phase resetting is invisible and there is no cut. */
+const OFF_FRAME = 130
 
 /** Sine-edged fill line, as a percentage-based polygon clip. */
 function tideClip(level: number, phase: number, amplitude: number) {
@@ -41,32 +46,59 @@ function tideClip(level: number, phase: number, amplitude: number) {
   return `polygon(${points.join(', ')})`
 }
 
-/** Tapioca. Each lands on its own beat so they read as poured, not placed. */
+/**
+ * Tapioca. Each lands on its own beat so they read as poured, not placed.
+ *
+ * `from: 0` on the first one: the cycle starts moving on frame 0 with nothing
+ * held back, so a loop never sits on a still frame waiting to begin.
+ *
+ * They leave down the bottom as the cup empties. That matters for the loop —
+ * left behind, they'd be stranded as black circles on bare cream once the tide
+ * drained out from under them.
+ */
 const PEARLS = [
-  { x: 39, size: 66, from: 6, to: 30, rest: 74 },
-  { x: 50, size: 76, from: 10, to: 36, rest: 78 },
-  { x: 61.5, size: 62, from: 14, to: 40, rest: 74.5 },
-  { x: 45, size: 52, from: 18, to: 44, rest: 68 },
-  { x: 56, size: 48, from: 22, to: 47, rest: 68.5 },
+  { x: 39, size: 66, from: 0, to: 26, rest: 74 },
+  { x: 50, size: 76, from: 3, to: 30, rest: 78 },
+  { x: 61.5, size: 62, from: 6, to: 34, rest: 74.5 },
+  { x: 45, size: 52, from: 9, to: 36, rest: 68 },
+  { x: 56, size: 48, from: 12, to: 38, rest: 68.5 },
 ]
+
+/** The cycle: pour, hold, sip it back down, repeat. */
+const POURED = 42
+const SETTLED = 58
+const DRAIN_FROM = 102
+const DRAIN_TO = 144
 
 export default function ThirsteaLogoReveal() {
   const frame = useCurrentFrame()
 
-  /* The tide. Starts below the frame, overshoots slightly, settles back — the
-     way liquid actually behaves when it stops moving. */
-  const level = interpolate(frame, [6, 52, 68, 82], [128, REST_LEVEL - 3, REST_LEVEL + 1.5, REST_LEVEL], {
-    easing: Easing.bezier(0.22, 1, 0.36, 1),
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  })
+  /* The tide, over one full cycle. It moves on frame 0 — no lead-in — pours
+     past its resting line, settles back, holds through the middle of the loop,
+     then drains away to exactly where it started. Beginning and end are both
+     off the bottom of the frame, so the repeat has no seam. */
+  const level = interpolate(
+    frame,
+    [0, POURED, SETTLED, DRAIN_FROM, DRAIN_TO],
+    [OFF_FRAME, REST_LEVEL - 3.5, REST_LEVEL, REST_LEVEL, OFF_FRAME],
+    {
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+    },
+  )
 
-  /* Choppy while pouring, almost flat once it settles. */
-  const amplitude = interpolate(frame, [6, 52, 88], [5.5, 3.2, 1.1], {
-    easing: Easing.bezier(0.22, 1, 0.36, 1),
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  })
+  /* Choppy while pouring, almost flat at rest, stirred up again on the way out. */
+  const amplitude = interpolate(
+    frame,
+    [0, POURED, SETTLED + 20, DRAIN_FROM, DRAIN_TO],
+    [6, 3.2, 1.2, 2.4, 5],
+    {
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+      extrapolateLeft: 'clamp',
+      extrapolateRight: 'clamp',
+    },
+  )
 
   const phase = frame * 0.14
   const clipPath = tideClip(level, phase, amplitude)
@@ -89,11 +121,16 @@ export default function ThirsteaLogoReveal() {
 
       {/* 2 — tapioca, dropped in before the tide arrives to cover them. */}
       {PEARLS.map((p) => {
-        const drop = interpolate(frame, [p.from, p.to], [-40, p.rest], {
-          easing: Easing.spring({ damping: 11, mass: 0.6, stiffness: 120 }),
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-        })
+        const drop = interpolate(
+          frame,
+          [p.from, p.to, DRAIN_FROM, DRAIN_TO - 4],
+          [-40, p.rest, p.rest, 150],
+          {
+            easing: Easing.spring({ damping: 11, mass: 0.6, stiffness: 120 }),
+            extrapolateLeft: 'clamp',
+            extrapolateRight: 'clamp',
+          },
+        )
         return (
           <div
             key={p.x}
@@ -152,13 +189,13 @@ export default function ThirsteaLogoReveal() {
           clipPath,
           height: 10,
           left: 0,
-          opacity: interpolate(frame, [58, 70, 92], [0, 0.9, 0], {
+          opacity: interpolate(frame, [SETTLED, SETTLED + 14, DRAIN_FROM - 6], [0, 0.9, 0], {
             extrapolateLeft: 'clamp',
             extrapolateRight: 'clamp',
           }),
           position: 'absolute',
           top: `${level}%`,
-          transform: `translateX(${interpolate(frame, [58, 92], [-60, 60], {
+          transform: `translateX(${interpolate(frame, [SETTLED, DRAIN_FROM - 6], [-60, 60], {
             easing: Easing.bezier(0.22, 1, 0.36, 1),
             extrapolateLeft: 'clamp',
             extrapolateRight: 'clamp',

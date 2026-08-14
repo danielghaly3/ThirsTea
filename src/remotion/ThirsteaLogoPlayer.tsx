@@ -3,9 +3,6 @@ import { useEffect, useRef } from 'react'
 import ThirsteaLogoReveal, { DURATION } from './ThirsteaLogoReveal'
 
 const DURATION_IN_FRAMES = DURATION
-/* Hold here rather than at DURATION_IN_FRAMES: the Player rewinds the moment
-   it reaches the end, so the stop has to land before it. */
-const LAST_FRAME = DURATION_IN_FRAMES - 2
 
 export default function ThirsteaLogoPlayer() {
   const playerRef = useRef<PlayerRef>(null)
@@ -51,28 +48,7 @@ export default function ThirsteaLogoPlayer() {
 
     timer = window.setTimeout(tryStart, 0)
 
-    /*
-     * Stop on the last frame and stay there.
-     *
-     * The Player has no "play once and hold" mode. Looping restarts at the
-     * blank frame 0, so the finished logo wiped itself every four seconds;
-     * NOT looping is worse, because on 'ended' the Player rewinds to frame 0
-     * and pauses there, leaving the mark permanently invisible.
-     *
-     * So the stop is done here, one frame early, while it is still playing.
-     * Pausing before the end means the rewind never happens and the composition
-     * simply rests on the finished lockup — which is the real logo.
-     */
-    const player = playerRef.current
-    const hold = ({ detail }: { detail: { frame: number } }) => {
-      if (detail.frame >= LAST_FRAME) playerRef.current?.pause()
-    }
-    player?.addEventListener('frameupdate', hold)
-
-    return () => {
-      window.clearTimeout(timer)
-      player?.removeEventListener('frameupdate', hold)
-    }
+    return () => window.clearTimeout(timer)
   }, [])
 
   return (
@@ -85,17 +61,15 @@ export default function ThirsteaLogoPlayer() {
       fps={30}
       autoPlay
       /*
-       * Deliberately not looping.
+       * Looping is safe with this composition and was not with the last one.
        *
-       * Frame 0 of this composition is the pre-reveal state — pearl offscreen,
-       * wordmark at opacity 0 — so a loop meant the finished logo blanked out
-       * completely every four seconds and rebuilt itself, forever, in the
-       * corner of the visitor's eye. It reads as the logo failing to load
-       * rather than as an ident.
-       *
-       * An ident introduces a mark and then gets out of the way. It plays once
-       * and holds its last frame, which is the shop's actual logo.
+       * The old ident faded its letters up from nothing, so frame 0 was an
+       * empty circle and every repeat wiped the logo. This one draws the
+       * wordmark opaque on every frame — the cycle only pours the tide in and
+       * sips it back out — and it begins and ends with the tide off the bottom
+       * of the frame, so the repeat has no visible seam.
        */
+      loop
       controls={false}
       allowFullscreen={false}
       clickToPlay={false}
